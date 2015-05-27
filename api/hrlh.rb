@@ -12,12 +12,27 @@ module HRLH
       end
     end
     resource :diagnostic do
-      desc "Return a public timeline."
       get do
         {
           heartbeat: 'bidong',
           database: database.client.ping.status
         }
+      end
+    end
+
+    resource :interviewer do
+      desc "create interviewer"
+      params do
+        requires :name, type: String
+        requires :email, type: String
+      end
+      post do
+        database['interviewer']
+          .create({
+                    name: params[:name],
+                    email: params[:email]
+                  })
+          .id
       end
     end
   end
