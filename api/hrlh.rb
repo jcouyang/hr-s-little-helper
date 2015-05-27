@@ -15,7 +15,7 @@ module HRLH
       desc "Return a public timeline."
       get do
         {
-          heartbeat: 'pong',
+          heartbeat: 'bidong',
           database: database.client.ping.status
         }
       end
