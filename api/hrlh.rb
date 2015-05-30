@@ -28,12 +28,16 @@ module HRLH
       end
       post do
         database['interviewer']
-          .create({
-                    name: params[:name],
-                    email: params[:email]
-                  })
-          .id
+          .set(
+            params[:email],
+            {
+              name: params[:name],
+              email: params[:email]
+            },
+            false
+          ).value
       end
+
     end
   end
 end
