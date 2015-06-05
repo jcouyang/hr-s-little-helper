@@ -27,17 +27,29 @@ module HRLH
         requires :email, type: String
       end
       post do
+        header 'Access-Control-Allow-Origin', '*'
         database['interviewer']
-          .set(
+        .set(
             params[:email],
             {
-              name: params[:name],
-              email: params[:email]
+                name: params[:name],
+                email: params[:email]
             },
             false
-          ).value
+        ).value
       end
-
     end
+
+  resource :interviewers do
+    desc 'get all interviews'
+    get do
+      header 'Access-Control-Allow-Origin', '*'
+      interviewer =database['interviewer']
+      interviewer.find_all.map(&:value)
+    end
+  end
+
+
+
   end
 end

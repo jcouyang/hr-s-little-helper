@@ -31,4 +31,19 @@ describe HRLH::API do
       expect_json(interviewer)
     end
   end
+
+  describe "GET /interviewers" do
+    let(:database) {{'interviewer' => collection}}
+    let(:interviewer1) {{name:'Jichao', email:'jichao@thoughtworks.com'}}
+    let(:interviewer2) {{name:'Ouyang', email:'ouayng@thoughtworks.com'}}
+    before do
+      expect(collection).to receive(:find_all).and_return([double(value: interviewer1),double(value: interviewer2) ])
+    end
+    it "returns all interviewers" do
+
+      get "/api/v1/interviewers"
+      expect(json_body).to eql([interviewer1,interviewer2])
+    end
+  end
+
 end
