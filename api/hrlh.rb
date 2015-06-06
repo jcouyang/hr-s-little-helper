@@ -28,16 +28,26 @@ module HRLH
       end
       post do
         database['interviewer']
-          .set(
+        .set(
             params[:email],
             {
-              name: params[:name],
-              email: params[:email]
+                name: params[:name],
+                email: params[:email]
             },
             false
-          ).value
+        ).value
       end
-
     end
+
+  resource :interviewers do
+    desc 'get all interviews'
+    get do
+      interviewer =database['interviewer']
+      interviewer.find_all.map(&:value)
+    end
+  end
+
+
+
   end
 end
