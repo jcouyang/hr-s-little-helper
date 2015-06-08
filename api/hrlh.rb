@@ -43,11 +43,19 @@ module HRLH
       desc 'create interiew'
       params do
         requires :description, type: String
+        requires :interviewers, type: Array
       end
       post do
-        database.client.post('interview', {
-                        description: params[:description]
-                      })
+        resp = database.client.post('interview', {
+                                      description: params[:description]
+                                    })
+        return resp if resp.status!=201
+        key = resp.location.match(/interview\/(?<key>.*)\/refs/)[:key]
+
+        database['interviewer'].search("email:#{params[:interviewers].join(' or ')}").find.each do |score, interviewer|
+          interviewer.relations[:attend] << database['interview'][key]
+          database['interview'][key].relations[:attend_by] << interviewer
+        end
       end
     end
 
