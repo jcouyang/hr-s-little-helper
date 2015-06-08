@@ -1,5 +1,5 @@
 # A sample Gemfile
-source "https://rubygems.org"
+source 'https://ruby.taobao.org/'
 gem 'grape'
 gem 'rack-cors'
 gem 'orchestrate'

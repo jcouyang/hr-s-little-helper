@@ -39,15 +39,24 @@ module HRLH
       end
     end
 
-  resource :interviewers do
-    desc 'get all interviews'
-    get do
-      interviewer =database['interviewer']
-      interviewer.find_all.map(&:value)
+    resource :interview do
+      desc 'create interiew'
+      params do
+        requires :description, type: String
+      end
+      post do
+        database.client.post('interview', {
+                        description: params[:description]
+                      })
+      end
     end
-  end
 
-
-
+    resource :interviewers do
+      desc 'get all interviews'
+      get do
+        interviewer =database['interviewer']
+        interviewer.find_all.map(&:value)
+      end
+    end
   end
 end
