@@ -1,5 +1,6 @@
 require 'grape'
 require 'orchestrate'
+require_relative '../models/interviewer'
 
 module HRLH
   class API < Grape::API
@@ -9,6 +10,14 @@ module HRLH
     helpers do
       def database
         @database ||= Orchestrate::Application.new(ENV['ORCH_API_KEY'],ENV['ORCH_REGION'])
+      end
+
+      def interview_db
+        database['interviewer']
+      end
+
+      def to_interviewer(result)
+        result.value.merge({"key"=>result.key})
       end
     end
     resource :diagnostic do
@@ -27,23 +36,41 @@ module HRLH
         requires :email, type: String
       end
       post do
-        database['interviewer']
-        .set(
-            params[:email],
+        interview_db
+        .create(
             {
                 name: params[:name],
                 email: params[:email]
-            },
-            false
+            }
         ).value
+      end
+
+      desc 'single interviewer'
+      params do
+        requires :key, type: String
+      end
+      route_param :key do
+        get do
+          to_interviewer(interview_db[params[:key]])
+        end
+
+        put do
+          interviewer = interview_db[params[:key]]
+          interviewer[:name] = params[:name] if params[:name]
+          interviewer[:email] = params[:email] if params[:email]
+          interviewer.save
+        end
+
+        delete do
+          interview_db.delete(params[:key])
+        end
       end
     end
 
   resource :interviewers do
     desc 'get all interviews'
     get do
-      interviewer =database['interviewer']
-      interviewer.find_all.map(&:value)
+      interview_db.map{|result| to_interviewer(result)}
     end
   end
 
