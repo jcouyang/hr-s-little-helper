@@ -4,5 +4,12 @@ gem 'grape'
 gem 'rack-cors'
 gem 'orchestrate'
 gem 'shotgun'
-gem 'airborne'
-gem 'pry'
+
+group :test do
+  gem 'timecop'
+  gem 'airborne'
+end
+
+group :development do
+  gem 'pry'
+end

@@ -53,7 +53,7 @@ module HRLH
             {
                 name: params[:name],
                 email: params[:email],
-                work_from: work_from.to_s,
+                work_from: work_from,
                 language: params[:language]
             }
         ).value
