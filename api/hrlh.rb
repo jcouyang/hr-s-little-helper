@@ -13,6 +13,9 @@ module HRLH
         @database ||= Orchestrate::Application.new(ENV['ORCH_API_KEY'],ENV['ORCH_REGION'])
       end
 
+      def auth! name, pass
+        URI.decode_www_form_component(name)==ENV['ORCH_REGION']&&pass==ENV['ORCH_API_KEY']
+      end
       def interview_db
         database['interviewer']
       end
@@ -41,6 +44,9 @@ module HRLH
     end
 
     resource :interviewer do
+      http_basic do |username, password|
+        auth! username, password
+      end
       desc "create interviewer"
       params do
         requires :name, type: String
@@ -84,6 +90,10 @@ module HRLH
     end
 
     resource :interview do
+      http_basic do |username, password|
+        auth! username, password
+      end
+
       desc 'get interview'
       route_param :id do
         get do
@@ -153,6 +163,10 @@ module HRLH
     end
 
     resource :interviewers do
+      http_basic do |username, password|
+        auth! username, password
+      end
+      
       desc 'get all interviews'
       get do
         interview_db.map{|result| to_interviewer(result)}
@@ -160,6 +174,9 @@ module HRLH
     end
 
     resource :interviews do
+      http_basic do |username, password|
+        auth! username, password
+      end
       desc 'list all interviews'
       get do
         database['interview'].map{ |interview|
