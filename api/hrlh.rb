@@ -71,11 +71,13 @@ module HRLH
       desc 'create interiew'
       params do
         requires :description, type: String
+        requires :name, type: String
         requires :interviewers, type: Array
       end
       post do
         resp = database.client.post('interview', {
-                                      description: params[:description]
+                                      description: params[:description],
+                                      name: params[:name]
                                     })
         return resp if resp.status!=201
         key = resp.location.match(/interview\/(?<key>.*)\/refs/)[:key]
@@ -94,5 +96,17 @@ module HRLH
       end
     end
 
+    resource :interviews do
+      desc 'list all interviews'
+      get do
+        database['interview'].map{ |interview|
+          {
+            key: interview.key,
+            name: interview.value['name'],
+            description: interview.value['description']
+          }
+        }
+      end
+    end
   end
 end
