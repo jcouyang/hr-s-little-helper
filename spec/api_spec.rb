@@ -11,6 +11,9 @@ describe HRLH::API do
   let(:interviewer) { {name: 'Jichao', email: 'jichao@thoughtworks.com', language: 'ruby', experience: 4} }
 
   before do
+    Grape::Endpoint.before_each do |endpoint|
+      allow(endpoint).to receive(:auth!).and_return(true)
+    end    
     Timecop.freeze(Time.parse('2015-4-1'))
     allow(database).to receive(:client) { client }
     allow(database).to receive(:[]).with('interviewer').and_return(collection)
@@ -19,6 +22,7 @@ describe HRLH::API do
   end
 
   after do
+    Grape::Endpoint.before_each nil
     Timecop.return
   end
 
@@ -37,6 +41,7 @@ describe HRLH::API do
     end
     it "returns new interviewer id" do
       post "/api/v1/interviewer", interviewer
+      require 'pry';binding.pry
       expect_json(interviewer)
     end
   end
