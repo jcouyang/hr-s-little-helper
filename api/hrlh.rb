@@ -1,5 +1,6 @@
 require 'grape'
 require 'orchestrate'
+require 'time'
 require_relative '../models/interviewer'
 
 module HRLH
@@ -17,7 +18,17 @@ module HRLH
       end
 
       def to_interviewer(result)
-        result.value.merge({"key"=>result.key})
+        interviewer = result.value.merge({"key"=>result.key})
+        interviewer["experience"] = work_from_to_experience(interviewer["work_from"])
+        interviewer
+      end
+
+      def work_from_to_experience work_from
+        work_from ? Time.now.year - work_from.to_i : 0
+      end
+      
+      def experience_to_work_from experience
+        experience ? Time.now.year - experience.to_i : Time.now.year
       end
     end
     resource :diagnostic do
@@ -36,11 +47,14 @@ module HRLH
         requires :email, type: String
       end
       post do
+        work_from = experience_to_work_from(params[:experience])
         interview_db
         .create(
             {
                 name: params[:name],
-                email: params[:email]
+                email: params[:email],
+                work_from: work_from,
+                language: params[:language]
             }
         ).value
       end
@@ -58,6 +72,8 @@ module HRLH
           interviewer = interview_db[params[:key]]
           interviewer[:name] = params[:name] if params[:name]
           interviewer[:email] = params[:email] if params[:email]
+          interviewer[:language] = params[:language] if params[:language]
+          interviewer[:work_from] = experience_to_work_from(params[:experience]) if params[:experience]
           interviewer.save
         end
 
