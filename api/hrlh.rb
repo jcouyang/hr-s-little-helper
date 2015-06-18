@@ -187,6 +187,22 @@ module HRLH
           }
         }
       end
+
+      resource :query do
+        desc 'query interviews'
+        params do
+          requires :keyword, type: String
+        end
+        get do
+          database[:interview].search(params[:keyword]).find.map do |rank,interview|
+            {
+              key: interview.key,
+              name: interview.value['name'],
+              description: interview.value['description']
+            }
+          end
+        end
+      end
     end
   end
 end
