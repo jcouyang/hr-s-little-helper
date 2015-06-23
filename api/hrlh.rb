@@ -149,6 +149,17 @@ module HRLH
             end
           end
         end
+
+        delete do
+          interview = interview_tb[params[:id]]
+          interviewer_ids =  interview.relations[:attend_by].map{|s|s.key}
+          interviewer_ids.each do |interviewer_id|
+            interviewer = interviewer_tb[interviewer_id]
+            interviewer.relations[:attend].delete(interview)
+            interview.relations[:attend_by].delete(interviewer)
+          end
+          interview_tb.delete(params[:id])
+        end
       end
 
       desc 'create interview'
