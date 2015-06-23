@@ -16,8 +16,13 @@ module HRLH
       def auth! name, pass
         URI.decode_www_form_component(name)==ENV['ORCH_REGION']&&pass==ENV['ORCH_API_KEY']
       end
-      def interviewer_db
+      def interviewer_tb
         database['interviewer']
+      end
+
+
+      def interview_tb
+        database['interview']
       end
 
       def to_interviewer(result)
@@ -54,7 +59,7 @@ module HRLH
       end
       post do
         work_from = experience_to_work_from(params[:experience])
-        interviewer_db
+        interviewer_tb
         .create(
             {
                 name: params[:name],
@@ -71,11 +76,11 @@ module HRLH
       end
       route_param :key do
         get do
-          to_interviewer(interviewer_db[params[:key]])
+          to_interviewer(interviewer_tb[params[:key]])
         end
 
         put do
-          interviewer = interviewer_db[params[:key]]
+          interviewer = interviewer_tb[params[:key]]
           interviewer[:name] = params[:name] if params[:name]
           interviewer[:email] = params[:email] if params[:email]
           interviewer[:language] = params[:language] if params[:language]
@@ -84,7 +89,7 @@ module HRLH
         end
 
         delete do
-          interviewer_db.delete(params[:key])
+          interviewer_tb.delete(params[:key])
         end
       end
     end
@@ -97,7 +102,7 @@ module HRLH
       desc 'get interview'
       route_param :id do
         get do
-          interview = database['interview'][params[:id]]
+          interview = interview_tb[params[:id]]
           interviewers = interview.relations[:attend_by].map{ |i|
             {
               key: i.key,
@@ -106,6 +111,13 @@ module HRLH
             }
           }
           interview.value['interviewers']=interviewers
+
+          if interview['comments']
+            comments_list = Hash[interview['comments'].map { |interviewer_id, comments|
+              [interviewer_id, {name: interviewers.find { |interviewer| interviewer[:key] == interviewer_id }[:name], comments: comments}]
+            }]
+            interview.value['comments']=comments_list
+          end
           interview.value
         end
         params do
@@ -115,7 +127,8 @@ module HRLH
           optional :interviewers, type: Array
         end
         put do
-          interview = database[:interview][params[:id]]
+          interview = interview_tb[params[:id]]
+          current_interviewer_ids = interview[:interviewers]
           updated = params.reject{ |key,val|val.nil?}
             .map{ |key, val| interview[key] = val if val!=interview[key]}
             .size
@@ -123,14 +136,14 @@ module HRLH
           interview.save
           if params[:interviewers]
             # delete old relatioins
-            interview[:interviewers].each do |id|
-              interviewer = database[:interviewer][id]
+            current_interviewer_ids.each do |id|
+              interviewer = interviewer_tb[id]
               interview.relations[:attend_by].delete(interviewer)
               interviewer.relations[:attend].delete(interview)
             end
             # build new relations
             params[:interviewers].each do |id|
-              interviewer = database[:interviewer][id]
+              interviewer = interviewer_tb[id]
               interview.relations[:attend_by] << interviewer
               interviewer.relations[:attend] << interview
             end
@@ -151,14 +164,14 @@ module HRLH
                                       name: params[:name],
                                       date: params[:date],
                                       interviewers: params[:interviewers],
-                                      comments: params.get(:comments,[])
+                                      comments: params.fetch(:comments,{})
                                     })
         return resp if resp.status!=201
         key = resp.location.match(/interview\/(?<key>.*)\/refs/)[:key]
 
         params[:interviewers].each do |id|
-          interviewer_db[id].relations[:attend] << database['interview'][key]
-          database['interview'][key].relations[:attend_by] << interviewer_db[id]
+          interviewer_tb[id].relations[:attend] << interview_tb[key]
+          interview_tb[key].relations[:attend_by] << interviewer_tb[id]
         end
       end
     end
@@ -170,7 +183,7 @@ module HRLH
       
       desc 'get all interviews'
       get do
-        interviewer_db.map{|result| to_interviewer(result)}
+        interviewer_tb.map{|result| to_interviewer(result)}
       end
     end
 
