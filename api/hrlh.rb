@@ -210,7 +210,7 @@ module HRLH
       end
       desc 'list all interviews'
       get do
-        database['interview'].map{ |interview|
+        interview_tb.map{ |interview|
           {
             key: interview.key,
             name: interview.value['name'],
@@ -225,7 +225,7 @@ module HRLH
           requires :keyword, type: String
         end
         get do
-          database[:interview].search(params[:keyword]).find.map do |rank,interview|
+          interview_tb.search("*#{params[:keyword]}*").order(:rank).find.map do |rank,interview|
             {
               key: interview.key,
               name: interview.value['name'],
