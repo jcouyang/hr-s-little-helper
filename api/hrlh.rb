@@ -25,9 +25,15 @@ module HRLH
         database['interview']
       end
 
+      def get_all_comments(result)
+          result.relations[:attend].map{|interview| interview['comments'][result.key]}.flatten.compact
+      end
+
       def to_interviewer(result)
         interviewer = result.value.merge({"key"=>result.key})
         interviewer["experience"] = work_from_to_experience(interviewer["work_from"])
+        scores  = result.relations[:attend] ? get_all_comments(result).map{|comment|comment['score']} : []
+        interviewer["avg_score"] = (scores.size > 0 ? (scores.reduce(:+).to_f / scores.size) : 0).round(2)
         interviewer
       end
 

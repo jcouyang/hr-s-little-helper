@@ -7,7 +7,8 @@ describe HRLH::API do
   let(:database) { double('database') }
   let(:client) { double('client') }
   let(:collection) { double('collection') }
-  let(:interviewer_record_in_db) { double(value: {'name' => 'Jichao', 'email' => 'jichao@thoughtworks.com', 'language'=>'ruby', 'work_from'=>'2011'}, key: key) }
+  let(:relations){{}}
+  let(:interviewer_record_in_db) { double(relations:relations, value: {'name' => 'Jichao', 'email' => 'jichao@thoughtworks.com', 'language'=>'ruby', 'work_from'=>'2011'}, key: key) }
   let(:interviewer) { {name: 'Jichao', email: 'jichao@thoughtworks.com', language: 'ruby', experience: 4} }
 
   before do
@@ -44,12 +45,12 @@ describe HRLH::API do
   end
 
   describe "GET /interviewers" do
-    let(:collection) { [double(value: interviewer1_db, key: '001'), double(value: interviewer2_db, key: '002')] }
+    let(:collection) { [double(relations:relations, value: interviewer1_db, key: '001'), double(relations:relations, value: interviewer2_db, key: '002')] }
     let(:interviewer1_db) { {"name"=> 'Jichao', "email"=> 'jichao@thoughtworks.com', "work_from"=> 2011} }
     let(:interviewer2_db) { {"name"=> 'Ouyang', "email"=> 'ouayng@thoughtworks.com', "work_from"=> 2015} }
 
-    let(:interviewer1_modle) { {name: 'Jichao', email: 'jichao@thoughtworks.com', key: '001', work_from: 2011, experience: 4} }
-    let(:interviewer2_modle) { {name: 'Ouyang', email: 'ouayng@thoughtworks.com', key: '002', work_from: 2015, experience: 0} }
+    let(:interviewer1_modle) { {name: 'Jichao', email: 'jichao@thoughtworks.com', key: '001', work_from: 2011, experience: 4, avg_score: 0.0} }
+    let(:interviewer2_modle) { {name: 'Ouyang', email: 'ouayng@thoughtworks.com', key: '002', work_from: 2015, experience: 0, avg_score: 0.0} }
 
     it "returns all interviewers" do
       get "/api/v1/interviewers"
@@ -62,7 +63,7 @@ describe HRLH::API do
     let(:collection) { {'123456' => interviewer_record_in_db} }
     it "returns interviewer with key=:id" do
       get "/api/v1/interviewer/#{key}"
-      expect(json_body).to eql({name: 'Jichao', email: 'jichao@thoughtworks.com', key: '123456', experience:4, language: 'ruby', work_from: '2011'})
+      expect(json_body).to eql({name: 'Jichao', email: 'jichao@thoughtworks.com', key: '123456', experience:4, language: 'ruby', work_from: '2011', avg_score: 0.0})
     end
   end
 
