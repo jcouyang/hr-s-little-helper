@@ -119,9 +119,10 @@ module HRLH
           interview.value['interviewers']=interviewers
 
           if interview['comments']
-            comments_list = Hash[interview['comments'].map { |interviewer_id, comments|
-              [interviewer_id, {name: interviewers.find { |interviewer| interviewer[:key] == interviewer_id }[:name], comments: comments}]
-            }]
+            comments_list = interview['comments'].reduce({}){ |new_hash, comment|
+              interviewer = interviewers.find { |interviewer| interviewer[:key] == comment.first }
+              interviewer ? new_hash.merge({comment.first => {name: interviewer[:name], comments: comment.last}}) : new_hash
+            }
             interview.value['comments']=comments_list
           end
           interview.value
@@ -179,6 +180,7 @@ module HRLH
         resp = database.client.post('interview', {
                                       description: params[:description],
                                       name: params[:name],
+                                      experience: params[:experience],
                                       date: params[:date],
                                       interviewers: params[:interviewers],
                                       comments: params.fetch(:comments,{})
