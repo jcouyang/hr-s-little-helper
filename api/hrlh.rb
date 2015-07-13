@@ -33,6 +33,7 @@ module HRLH
         interviewer = result.value.merge({"key"=>result.key})
         interviewer["experience"] = work_from_to_experience(interviewer["work_from"])
         scores  = result.relations[:attend] ? get_all_comments(result).map{|comment|comment['score']} : []
+        interviewer["interview_history"]= result.relations[:attend] ? result.relations[:attend].map(&:value) : []
         interviewer["avg_score"] = (scores.size > 0 ? (scores.reduce(:+).to_f / scores.size) : 0).round(2)
         interviewer
       end
@@ -214,8 +215,9 @@ module HRLH
       get do
         interview_tb.map{ |interview|
           {
-            key: interview.key,
+            id: interview.key,
             name: interview.value['name'],
+            date: interview.value['date'],
             description: interview.value['description']
           }
         }
