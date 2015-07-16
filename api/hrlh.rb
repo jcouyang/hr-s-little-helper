@@ -184,7 +184,8 @@ module HRLH
                                       experience: params[:experience],
                                       date: params[:date],
                                       interviewers: params[:interviewers],
-                                      comments: params.fetch(:comments,{})
+                                      comments: params.fetch(:comments,{}),
+                                      language: params.fetch(:language,[])
                                     })
         return resp if resp.status!=201
         key = resp.location.match(/interview\/(?<key>.*)\/refs/)[:key]
@@ -216,6 +217,7 @@ module HRLH
         interview_tb.map{ |interview|
           {
             id: interview.key,
+            language: interview.value['language'] || [],
             name: interview.value['name'],
             date: interview.value['date'],
             description: interview.value['description']
@@ -231,7 +233,9 @@ module HRLH
         get do
           interview_tb.search("*#{params[:keyword]}*").order(:rank).find.map do |rank,interview|
             {
-              key: interview.key,
+              id: interview.key,
+              language: interview.value['language'] || [],
+              date: interview.value['date'],
               name: interview.value['name'],
               description: interview.value['description']
             }
