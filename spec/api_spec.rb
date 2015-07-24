@@ -49,8 +49,8 @@ describe HRLH::API do
     let(:interviewer1_db) { {"name"=> 'Jichao', "email"=> 'jichao@thoughtworks.com', "work_from"=> 2011} }
     let(:interviewer2_db) { {"name"=> 'Ouyang', "email"=> 'ouayng@thoughtworks.com', "work_from"=> 2015} }
 
-    let(:interviewer1_modle) { {name: 'Jichao', email: 'jichao@thoughtworks.com', key: '001', work_from: 2011, experience: 4, avg_score: 0.0, interview_history: []} }
-    let(:interviewer2_modle) { {name: 'Ouyang', email: 'ouayng@thoughtworks.com', key: '002', work_from: 2015, experience: 0, avg_score: 0.0, interview_history: []} }
+    let(:interviewer1_modle) { {name: 'Jichao', email: 'jichao@thoughtworks.com', key: '001', work_from: 2011, experience: 4, avg_score: 0, interview_history: []} }
+    let(:interviewer2_modle) { {name: 'Ouyang', email: 'ouayng@thoughtworks.com', key: '002', work_from: 2015, experience: 0, avg_score: 0, interview_history: []} }
 
     it "returns all interviewers" do
       get "/api/v1/interviewers"
@@ -63,7 +63,7 @@ describe HRLH::API do
     let(:collection) { {'123456' => interviewer_record_in_db} }
     it "returns interviewer with key=:id" do
       get "/api/v1/interviewer/#{key}"
-      expect(json_body).to eql({name: 'Jichao', email: 'jichao@thoughtworks.com', key: '123456', experience:4, language: 'ruby', work_from: '2011', avg_score: 0.0, interview_history: []})
+      expect(json_body).to eql({name: 'Jichao', email: 'jichao@thoughtworks.com', key: '123456', experience:4, language: 'ruby', work_from: '2011', avg_score: 0, interview_history: []})
     end
   end
 
