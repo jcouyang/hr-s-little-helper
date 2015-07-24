@@ -1,7 +1,7 @@
 require 'grape'
 require 'orchestrate'
 require 'time'
-require_relative '../models/interviewer'
+require_relative '../models/score_computer'
 
 module HRLH
   class API < Grape::API
@@ -32,9 +32,8 @@ module HRLH
       def to_interviewer(result)
         interviewer = result.value.merge({"key"=>result.key})
         interviewer["experience"] = work_from_to_experience(interviewer["work_from"])
-        scores  = result.relations[:attend] ? get_all_comments(result).map{|comment|comment['score']} : []
         interviewer["interview_history"]= result.relations[:attend] ? result.relations[:attend].map(&:value) : []
-        interviewer["avg_score"] = (scores.size > 0 ? (scores.reduce(:+).to_f / scores.size) : 0).round(2)
+        interviewer["avg_score"] =  ScoreComputer.compute_preciseness(result)
         interviewer
       end
 
@@ -46,6 +45,7 @@ module HRLH
         experience ? Time.now.year - experience.to_i : Time.now.year
       end
     end
+
     resource :diagnostic do
       get do
         {
